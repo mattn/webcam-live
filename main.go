@@ -5,30 +5,42 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"os/exec"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"time"
 )
 
+func defaultDriver() string {
+	if runtime.GOOS == "linux" {
+		return "v4l2"
+	}
+	if runtime.GOOS == "darwin" {
+		return "avfoundation"
+	}
+	return "dshow"
+}
+
 func main() {
-	var addr, format, camera string
+	var addr, driver, camera string
 	flag.StringVar(&addr, "addr", ":5000", "address to serve(host:port)")
-	flag.StringVar(&format, "format", "dshow", "camera format")
+	flag.StringVar(&driver, "driver", defaultDriver(), "camera driver")
 	flag.StringVar(&camera, "camera", "HP Truevision HD", "camera name")
 	flag.Parse()
 
 	args := []string{
-		"-f", format,
+		"-f", driver,
 		"-s", "320x240",
 		"-r", "30",
 		"-vcodec", "mjpeg",
 		"-i", "video=" + camera,
-		"-threads", "2",
+		"-threads", fmt.Sprint(runtime.NumCPU()),
 		"-codec:v", "libx264",
 		"-map", "0",
 		"-codec:v", "libx264",
