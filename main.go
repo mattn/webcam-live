@@ -23,12 +23,24 @@ func main() {
 	flag.Parse()
 
 	args := []string{
-		"-f", format, "-s", "320x240", "-r", "30", "-vcodec", "mjpeg", "-i",
-		"video=" + camera, "-threads", "2", "-codec:v", "libx264",
-		"-map", "0", "-codec:v", "libx264", "-codec:a", "libfaac",
-		"-f", "segment", "-segment_format", "mpegts", "-segment_list_size", "3",
-		"-segment_list_type", "m3u8", "-segment_time", "4", "-segment_list", "stream.m3u8",
-		"-segment_list_flags", "+live", "stream%05d.ts",
+		"-f", format,
+		"-s", "320x240",
+		"-r", "30",
+		"-vcodec", "mjpeg",
+		"-i", "video=" + camera,
+		"-threads", "2",
+		"-codec:v", "libx264",
+		"-map", "0",
+		"-codec:v", "libx264",
+		"-codec:a", "libfaac",
+		"-f", "segment",
+		"-segment_format", "mpegts",
+		"-segment_list_size", "8",
+		"-segment_list_type", "m3u8",
+		"-segment_time", "4",
+		"-segment_list", "stream.m3u8",
+		"-segment_list_flags", "+live",
+		"stream%05d.ts",
 	}
 
 	dir, err := ioutil.TempDir("", "webcam-live-")
