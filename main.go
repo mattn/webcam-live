@@ -13,9 +13,30 @@ import (
 	"os/exec"
 	"os/signal"
 	"runtime"
+	"strings"
 	"syscall"
 	"time"
 )
+
+func defaultCamera() string {
+	b, _ := exec.Command("ffmpeg", "-list_devices", "true", "-f", defaultDriver(), "-i", "dummy").CombinedOutput()
+	cameras := []string{}
+	for _, line := range strings.Split(string(b), "\n") {
+		pos := strings.Index(line, "] ")
+		if pos == -1 {
+			continue
+		}
+		line = strings.TrimSpace(line[pos+2:])
+		if !strings.HasPrefix(line, `"`) {
+			continue
+		}
+		cameras = append(cameras, strings.Trim(line, `"`))
+	}
+	if len(cameras) == 0 {
+		return ""
+	}
+	return cameras[0]
+}
 
 func defaultDriver() string {
 	if runtime.GOOS == "linux" {
@@ -31,7 +52,7 @@ func main() {
 	var addr, driver, camera string
 	flag.StringVar(&addr, "addr", ":5000", "address to serve(host:port)")
 	flag.StringVar(&driver, "driver", defaultDriver(), "camera driver")
-	flag.StringVar(&camera, "camera", "HP Truevision HD", "camera name")
+	flag.StringVar(&camera, "camera", defaultCamera(), "camera name")
 	flag.Parse()
 
 	args := []string{
